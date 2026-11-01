@@ -10,7 +10,8 @@ export const runtime = 'nodejs'
 // POST /api/admin/upload — multipart/form-data with a `file` field (image)
 //
 // Storage:
-//   1. Vercel Blob  — when BLOB_READ_WRITE_TOKEN is set (Vercel deployment).
+//   1. Vercel Blob  — when BLOB_READ_WRITE_TOKEN (classic token) or
+//                     BLOB_STORE_ID (OIDC, auto-injected on Vercel) is set.
 //                     Images persist on Vercel's CDN, URL returned directly.
 //   2. Local disk   — fallback (sandbox/local dev): public/uploads/<name>.
 const MAX_SIZE = 5 * 1024 * 1024 // 5 MB
@@ -48,8 +49,8 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer())
     const name = `${Date.now()}-${randomBytes(6).toString('hex')}${ext}`
 
-    // 1) Vercel Blob (production)
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
+    // 1) Vercel Blob (production — classic token OR OIDC via BLOB_STORE_ID)
+    if (process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID) {
       const blob = await put(`tbc-uploads/${name}`, file, {
         access: 'public',
         addRandomSuffix: false,
