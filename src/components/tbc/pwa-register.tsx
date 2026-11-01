@@ -1,0 +1,29 @@
+'use client'
+
+import { useEffect } from 'react'
+
+/**
+ * Registers the TBC service worker (PWA) in production builds only.
+ * Rendered once from the root layout.
+ */
+export function PWARegister() {
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') return
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
+
+    const register = () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // PWA is progressive enhancement — never break the site over SW errors
+      })
+    }
+
+    if (document.readyState === 'complete') {
+      register()
+      return
+    }
+    window.addEventListener('load', register)
+    return () => window.removeEventListener('load', register)
+  }, [])
+
+  return null
+}

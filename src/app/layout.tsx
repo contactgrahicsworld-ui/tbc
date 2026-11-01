@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/tbc/header";
 import { Footer } from "@/components/tbc/footer";
+import { PWARegister } from "@/components/tbc/pwa-register";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,6 +23,13 @@ export const metadata: Metadata = {
   authors: [{ name: "TBC — Tailik Business Committee" }],
   icons: {
     icon: "/tbc-logo.png",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "TBC",
+    statusBarStyle: "black-translucent",
   },
   openGraph: {
     title: "TBC — Tailik Business Committee | Business Networking & Growth",
@@ -36,6 +44,13 @@ export const metadata: Metadata = {
     title: "TBC — Tailik Business Committee | Business Networking & Growth",
     description: "Tailik Business Committee brings business professionals and entrepreneurs together to build trusted relationships, exchange opportunities and grow together.",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#C41E3A",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -54,6 +69,7 @@ export default function RootLayout({
           <Footer />
         </div>
         <Toaster />
+        <PWARegister />
       </body>
     </html>
   );
