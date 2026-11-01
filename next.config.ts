@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Standalone output is for self-hosting (sandbox). On Vercel it breaks
+  // routing (all pages 404) — must be unset there.
+  ...(process.env.VERCEL ? {} : { output: "standalone" }),
   typescript: {
     ignoreBuildErrors: true,
   },
