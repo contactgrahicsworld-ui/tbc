@@ -1,0 +1,225 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Member {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  phone       String?
+  photo       String?
+  business    String?
+  category    String?
+  profession  String?
+  city        String?
+  description String?
+  location    String?
+  chapterId      String?
+  chapter        Chapter?           @relation(fields: [chapterId], references: [id])
+  memberships   ChapterMembership[]
+  featured       Boolean            @default(false)
+  active         Boolean            @default(true)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model Chapter {
+  id           String              @id @default(cuid())
+  name         String
+  slug         String              @unique
+  location     String
+  city         String
+  area         String?
+  meetingDay   String
+  meetingTime  String
+  description  String?
+  image        String?
+  categories   String?
+  active          Boolean             @default(true)
+  members         Member[]
+  memberships     ChapterMembership[]
+  visitorRequests VisitorRequest[]
+  events          Event[]
+  createdAt       DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+}
+
+model ChapterMembership {
+  id        String   @id @default(cuid())
+  memberId  String
+  chapterId String
+  member    Member   @relation(fields: [memberId], references: [id])
+  chapter   Chapter  @relation(fields: [chapterId], references: [id])
+  role      String   @default("member")
+  joinedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([memberId, chapterId])
+}
+
+model Event {
+  id          String             @id @default(cuid())
+  title       String
+  slug        String             @unique
+  description String?
+  image       String?
+  date        String
+  time        String?
+  location    String?
+  chapterId   String?
+  chapter     Chapter?           @relation(fields: [chapterId], references: [id])
+  type        String             @default("networking")
+  featured    Boolean            @default(false)
+  active      Boolean            @default(true)
+  registrations EventRegistration[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+model EventRegistration {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  name      String
+  email     String
+  phone     String?
+  business  String?
+  message   String?
+  refNumber String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VisitorRequest {
+  id                String   @id @default(cuid())
+  name              String
+  mobile            String
+  email             String
+  business          String?
+  profession        String?
+  city              String?
+  chapterId         String?
+  chapter           Chapter? @relation(fields: [chapterId], references: [id])
+  preferredChapter  String?
+  preferredDate     String?
+  message           String?
+  status            String   @default("pending")
+  refNumber         String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model MembershipApplication {
+  id                String   @id @default(cuid())
+  name              String
+  email             String
+  phone             String
+  business          String?
+  profession        String?
+  category          String?
+  city              String?
+  address           String?
+  preferredChapter  String?
+  experience        String?
+  motivation        String?
+  referral          String?
+  refNumber         String   @unique
+  status            String   @default("pending")
+  step              Int      @default(1)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model ContactInquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String?
+  content     String?
+  image       String?
+  category    String?
+  author      String?
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  business  String?
+  category  String?
+  photo     String?
+  quote     String
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Admin {
+  id        String           @id @default(cuid())
+  name      String
+  email     String           @unique
+  mobile    String           @unique
+  password  String
+  role      String           @default("superadmin")
+  active    Boolean          @default(true)
+  sessions  AdminSession[]
+  resets    PasswordReset[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
